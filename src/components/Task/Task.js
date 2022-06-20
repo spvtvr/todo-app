@@ -8,6 +8,7 @@ export default class Task extends React.Component {
     description: 'Task name',
     createdTime: new Date(),
     onDeleted: () => {},
+    onEdit: () => {},
     onToggleActive: () => {},
     taskStatus: 'active',
     done: false,
@@ -17,24 +18,56 @@ export default class Task extends React.Component {
     description: PropTypes.string,
     createdTime: PropTypes.object,
     onDeleted: PropTypes.func,
+    onEdit: PropTypes.func,
     onToggleActive: PropTypes.func,
     taskStatus: PropTypes.string,
     done: PropTypes.bool,
   };
 
-  render() {
-    let { description, createdTime, onDeleted, onToggleActive, taskStatus, done } = this.props;
+  state = {
+    value: this.props.description,
+  };
 
+  onChangeInput = (e) => {
+    this.setState({
+      value: e.target.value,
+    });
+  };
+
+  saveText = (e) => {
+    const { value } = this.state;
+    const { id, edit } = this.props;
+    if (e.key === 'Enter') {
+      this.props.saveEditingText(value, id, edit);
+    }
+  };
+
+  render() {
+    let { description, createdTime, onDeleted, onEdit, onToggleActive, taskStatus, done, edit, id } = this.props;
+    const { value } = this.state;
     return (
       <li className={taskStatus}>
         <div className="view">
-          <input className="toggle" type="checkbox" defaultChecked={done} onClick={onToggleActive}></input>
-          <label>
-            <span className="description">{description}</span>
-            <span className="created">{`created ${formatDistanceToNow(createdTime)} ago`}</span>
-          </label>
-          <button className="icon icon-edit"></button>
-          <button className="icon icon-destroy" onClick={onDeleted}></button>
+          {edit === true ? (
+            <label>
+              <input
+                className="editinput"
+                onChange={this.onChangeInput}
+                value={value}
+                onKeyDown={(e) => this.saveText(e)}
+              ></input>
+            </label>
+          ) : (
+            <>
+              <input className="toggle" type="checkbox" onClick={onToggleActive} defaultChecked={done} />
+              <label>
+                <span className="description">{description}</span>
+                <span className="created"> created {formatDistanceToNow(createdTime)} ago</span>
+              </label>
+              <button className="icon icon-edit" onClick={() => onEdit(id, edit)}></button>
+              <button className="icon icon-destroy" onClick={onDeleted}></button>
+            </>
+          )}
         </div>
       </li>
     );

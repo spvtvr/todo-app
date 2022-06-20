@@ -23,6 +23,7 @@ class TodoApp extends React.Component {
       description: label,
       createdTime: new Date(),
       done: false,
+      edit: false,
     };
   }
 
@@ -47,6 +48,33 @@ class TodoApp extends React.Component {
       return {
         tasksData: copyArr,
       };
+    });
+  };
+
+  onEdit = (id, edit) => {
+    const { tasksData } = this.state;
+    const newTask = tasksData.map((el) => {
+      if (el.id === id) {
+        return { ...el, edit: !edit };
+      }
+      return el;
+    });
+    this.setState({
+      tasksData: newTask,
+    });
+  };
+
+  saveEditingText = (text, id, edit) => {
+    const { tasksData } = this.state;
+    const newTask = tasksData.map((el) => {
+      if (el.id === id) {
+        return { ...el, description: text, edit: !edit };
+      }
+      return el;
+    });
+
+    this.setState(() => {
+      return { tasksData: newTask };
     });
   };
 
@@ -102,7 +130,13 @@ class TodoApp extends React.Component {
       <section className="todoapp">
         <Header onItemAdded={this.addItem} />
         <section className="main">
-          <TaskList tasks={visibleItems} onDeleted={this.deleteItem} onToggleActive={this.onToggleActive.bind(this)} />
+          <TaskList
+            tasks={visibleItems}
+            onDeleted={this.deleteItem}
+            onEdit={this.onEdit}
+            saveEditingText={this.saveEditingText}
+            onToggleActive={this.onToggleActive.bind(this)}
+          />
           <Footer
             countTodo={doneCount}
             clearCompleted={this.clearCompleted}
